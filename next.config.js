@@ -9,3 +9,5 @@ module.exports = withBundleAnalyzer({
     domains: ['pbs.twimg.com']
   }
 })
+
+module.exports.staticPageGenerationTimeout = 1000

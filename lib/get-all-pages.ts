@@ -10,14 +10,23 @@ const uuid = !!includeNotionIdInUrls
 
 export const getAllPages = pMemoize(getAllPagesImpl, { maxAge: 60000 * 5 })
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export async function getAllPagesImpl(
   rootNotionPageId: string,
   rootNotionSpaceId: string
 ): Promise<Partial<types.SiteMap>> {
+  /* eslint-disable */
+  const getPage = async (pageId) => {
+    await delay(process.env.NOTION_REQUEST_SLOW_INTERVAL)
+    return notion.getPage(pageId)
+  }
+  /* eslint-enable */
   const pageMap = await getAllPagesInSpace(
     rootNotionPageId,
     rootNotionSpaceId,
-    notion.getPage.bind(notion)
+    getPage,
+    { concurrency: 1 }
   )
 
   const canonicalPageMap = Object.keys(pageMap).reduce(

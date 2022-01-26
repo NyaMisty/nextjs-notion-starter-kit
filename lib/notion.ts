@@ -11,7 +11,7 @@ export const notion = new NotionAPI({
 })
 
 export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
-  const recordMap = await notion.getPage(pageId)
+  const recordMap = await notion.getPage(pageId, { concurrency: 1 })
   const blockIds = Object.keys(recordMap.block)
 
   const imageUrls: string[] = blockIds
