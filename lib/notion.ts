@@ -6,7 +6,8 @@ import { fetchTweetAst } from 'static-tweets'
 import pMap from 'p-map'
 
 export const notion = new NotionAPI({
-  apiBaseUrl: process.env.NOTION_API_BASE_URL
+  apiBaseUrl: process.env.NOTION_API_BASE_URL,
+  authToken: process.env.NOTION_API_AUTHTOKEN
 })
 
 export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
