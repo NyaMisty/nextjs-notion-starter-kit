@@ -1,0 +1,27 @@
+name: Github Action with a cronjob trigger
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */4 * * *"
+
+jobs:
+  cronjob-based-github-action:
+    name: Vercel refresh operation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Git Commit Info
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      - name: Introduce new change
+        run: |
+          new_message="[vercel-deploy-trigger] auto update $(date '+%Y%m%d %H%M%S')"
+          if [[ "$(git log -1 --pretty=%B)" == "[vercel-deploy-trigger] auto update"* ]]
+          then
+            git commit --amend --allow-empty -m "$new_message"
+          else
+            git commit --allow-empty -m "$new_message"
+          fi
+          git push -f
+      - uses: gautamkrishnar/keepalive-workflow@master # using the workflow with default settings
