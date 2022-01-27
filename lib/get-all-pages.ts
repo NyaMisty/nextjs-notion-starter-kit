@@ -8,9 +8,9 @@ import { getCanonicalPageId } from './get-canonical-page-id'
 
 const uuid = !!includeNotionIdInUrls
 
-export const getAllPages = pMemoize(getAllPagesImpl, { maxAge: 60000 * 5 })
+export const getAllPages = pMemoize(getAllPagesImpl, { maxAge: 60000 * 60 * 4 })
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+// const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export async function getAllPagesImpl(
   rootNotionPageId: string,
@@ -18,7 +18,7 @@ export async function getAllPagesImpl(
 ): Promise<Partial<types.SiteMap>> {
   /* eslint-disable */
   const getPage = async (pageId) => {
-    await delay(process.env.NOTION_REQUEST_SLOW_INTERVAL)
+    // await delay(process.env.NOTION_REQUEST_SLOW_INTERVAL)
     return notion.getPage(pageId)
   }
   /* eslint-enable */
@@ -33,7 +33,8 @@ export async function getAllPagesImpl(
     (map, pageId: string) => {
       const recordMap = pageMap[pageId]
       if (!recordMap) {
-        throw new Error(`Error loading page "${pageId}"`)
+        // throw new Error(`Error loading page "${pageId}"`)
+        console.warn(`Error loading page "${pageId}"`)
       }
 
       const canonicalPageId = getCanonicalPageId(pageId, recordMap, {
