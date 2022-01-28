@@ -8,7 +8,7 @@ import { getCanonicalPageId } from './get-canonical-page-id'
 
 const uuid = !!includeNotionIdInUrls
 
-export const getAllPages = pMemoize(getAllPagesImpl, { maxAge: 60000 * 60 * 4 })
+export const getAllPages = pMemoize(getAllPagesImpl, { maxAge: 60000 * 5 })
 
 // const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -26,7 +26,7 @@ export async function getAllPagesImpl(
     rootNotionPageId,
     rootNotionSpaceId,
     getPage,
-    { concurrency: 1 }
+    { concurrency: parseInt(process.env.NOTION_REQUEST_CONCURRENCY || '4') }
   )
 
   const canonicalPageMap = Object.keys(pageMap).reduce(
