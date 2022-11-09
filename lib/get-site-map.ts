@@ -1,32 +1,43 @@
+import { getAllPagesInSpace, uuidToId } from 'notion-utils'
 import pMemoize from 'p-memoize'
-import { getAllPagesInSpace } from 'notion-utils'
 
+import * as config from './config'
 import * as types from './types'
 import { includeNotionIdInUrls } from './config'
-import { notion } from './notion'
 import { getCanonicalPageId } from './get-canonical-page-id'
+import { notion } from './notion-api'
 
 const uuid = !!includeNotionIdInUrls
 
-export const getAllPages = pMemoize(getAllPagesImpl, { maxAge: 60000 * 5 })
+export async function getSiteMap(): Promise<types.SiteMap> {
+  const partialSiteMap = await getAllPages(
+    config.rootNotionPageId,
+    config.rootNotionSpaceId
+  )
 
-// const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+  return {
+    site: config.site,
+    ...partialSiteMap
+  } as types.SiteMap
+}
 
-export async function getAllPagesImpl(
+const getAllPages = pMemoize(getAllPagesImpl, {
+  cacheKey: (...args) => JSON.stringify(args)
+})
+
+async function getAllPagesImpl(
   rootNotionPageId: string,
   rootNotionSpaceId: string
 ): Promise<Partial<types.SiteMap>> {
-  /* eslint-disable */
-  const getPage = async (pageId) => {
-    // await delay(process.env.NOTION_REQUEST_SLOW_INTERVAL)
-    return notion.getPage(pageId)
+  const getPage = async (pageId: string, ...args) => {
+    console.log('\nnotion getPage', uuidToId(pageId))
+    return notion.getPage(pageId, ...args)
   }
-  /* eslint-enable */
+
   const pageMap = await getAllPagesInSpace(
     rootNotionPageId,
     rootNotionSpaceId,
-    getPage,
-    { concurrency: parseInt(process.env.NOTION_REQUEST_CONCURRENCY || '4') }
+    getPage
   )
 
   const canonicalPageMap = Object.keys(pageMap).reduce(
@@ -42,12 +53,13 @@ export async function getAllPagesImpl(
       })
 
       if (map[canonicalPageId]) {
-        console.error(
-          'error duplicate canonical page id',
+        // you can have multiple pages in different collections that have the same id
+        // TODO: we may want to error if neither entry is a collection page
+        console.warn('error duplicate canonical page id', {
           canonicalPageId,
           pageId,
-          map[canonicalPageId]
-        )
+          existingPageId: map[canonicalPageId]
+        })
 
         return map
       } else {
