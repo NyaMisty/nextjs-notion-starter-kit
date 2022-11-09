@@ -2,7 +2,7 @@ name: Github Action with a cronjob trigger
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */4 * * *"
+    - cron: "0 */2 * * *"
 
 jobs:
   cronjob-based-github-action:
