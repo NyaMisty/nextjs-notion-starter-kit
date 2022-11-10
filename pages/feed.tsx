@@ -10,11 +10,13 @@ import {
 import RSS from 'rss'
 
 import * as config from '@/lib/config'
-import { getSiteMap } from '@/lib/get-site-map'
+// import { getSiteMap } from '@/lib/get-site-map'
 import { getSocialImageUrl } from '@/lib/get-social-image-url'
 import { getCanonicalPageUrl } from '@/lib/map-page-url'
+import { getSiteMapStatic } from '@/lib/static-site-map'
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { req, res } = context
   if (req.method !== 'GET') {
     res.statusCode = 405
     res.setHeader('Content-Type', 'application/json')
@@ -23,7 +25,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     return { props: {} }
   }
 
-  const siteMap = await getSiteMap()
+  const siteMap = await getSiteMapStatic(context)
   const ttlMinutes = 24 * 60 // 24 hours
   const ttlSeconds = ttlMinutes * 60
 

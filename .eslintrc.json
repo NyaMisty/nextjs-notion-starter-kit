@@ -21,7 +21,7 @@
   "rules": {
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/no-non-null-assertion": 0,
-    "@typescript-eslint/no-unused-vars": 2,
+    "no-unused-vars": [2, {"vars": "all", "args": "after-used", "argsIgnorePattern": "^_|^next$|^React$"}],
     "react/prop-types": 0
   }
 }

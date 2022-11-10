@@ -1,10 +1,12 @@
 import type { GetServerSideProps } from 'next'
 
 import { host } from '@/lib/config'
-import { getSiteMap } from '@/lib/get-site-map'
 import type { SiteMap } from '@/lib/types'
+// import { getSiteMap } from '@/lib/get-site-map'
+import { getSiteMapStatic } from '@/lib/static-site-map'
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { req, res } = context
   if (req.method !== 'GET') {
     res.statusCode = 405
     res.setHeader('Content-Type', 'application/json')
@@ -15,12 +17,23 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     }
   }
 
-  const siteMap = await getSiteMap()
+  const siteMap = await getSiteMapStatic(context)
+  if (siteMap === null) {
+    res.statusCode = 405
+    res.setHeader('Content-Type', 'application/json')
+    res.write(JSON.stringify({ error: 'failed to parse sitemap.json' }))
+    res.end()
+    return {
+      props: {}
+    }
+  }
+
+  console.log(siteMap)
 
   // cache for up to 8 hours
   res.setHeader(
     'Cache-Control',
-    'public, max-age=28800, stale-while-revalidate=28800'
+    'public, max-age=7200, stale-while-revalidate=28800'
   )
   res.setHeader('Content-Type', 'text/xml')
   res.write(createSitemap(siteMap))
