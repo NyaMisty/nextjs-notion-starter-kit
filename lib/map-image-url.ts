@@ -8,5 +8,8 @@ export const mapImageUrl = (url: string, block: Block) => {
     return url
   }
 
-  return defaultMapImageUrl(url, block)
+  if (!url.startsWith("https://file.notion.so")) {
+    url = defaultMapImageUrl(url, block)
+  }
+  return url.replace("http://", "https://notion-image-proxy.misty.workers.dev/").replace("https://", "https://notion-image-proxy.misty.workers.dev/")
 }

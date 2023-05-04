@@ -9,6 +9,7 @@ module.exports = withBundleAnalyzer({
     domains: [
       'www.notion.so',
       'notion.so',
+      'notion-image-proxy.misty.workers.dev',
       'images.unsplash.com',
       'pbs.twimg.com',
       'abs.twimg.com',
@@ -17,6 +18,7 @@ module.exports = withBundleAnalyzer({
     ],
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
+    unoptimized: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"
   }
 })
