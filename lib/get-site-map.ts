@@ -12,7 +12,11 @@ const uuid = !!includeNotionIdInUrls
 export async function getSiteMap(): Promise<types.SiteMap> {
   const partialSiteMap = await getAllPages(
     config.rootNotionPageId,
-    config.rootNotionSpaceId ?? undefined
+    config.rootNotionSpaceId ?? undefined,
+    {
+      // filter out private blocks to avoid get indexed by search engines
+      filterBlocks: true
+    }
   )
 
   return {
@@ -35,19 +39,46 @@ const getPage = async (pageId: string, opts?: any) => {
   })
 }
 
+const getPageWithFilter = async (pageId: string, opts?: any) => {
+  const page = await getPage(pageId, opts)
+  // enum by content to ensure we only traverses blocks that are actually
+  // present in the page, as some blocks may not be rendered (such as filtered
+  // in collection views)
+  const enumBlockIdsByContent = async (blockId: string) => {
+    const block = page.block[blockId]?.value
+    // console.log("Processing block", blockId, ": ", block)
+    if (!block || !block.content) {
+      return []
+    }
+    const ret = [blockId]
+    for (const blockId of block.content) {
+      ret.push(...(await enumBlockIdsByContent(blockId)))
+    }
+    return ret
+  }
+
+  const blockIds = await enumBlockIdsByContent(pageId)
+  page.block = Object.fromEntries(
+    Object.entries(page.block).filter(([key, _]) => blockIds.includes(key))
+  );
+  return page
+}
+
 async function getAllPagesImpl(
   rootNotionPageId: string,
   rootNotionSpaceId?: string,
   {
-    maxDepth = 1
+    maxDepth = 1,
+    filterBlocks = false,
   }: {
     maxDepth?: number
+    filterBlocks?: boolean
   } = {}
 ): Promise<Partial<types.SiteMap>> {
   const pageMap = await getAllPagesInSpace(
     rootNotionPageId,
     rootNotionSpaceId,
-    getPage,
+    !filterBlocks ? getPage : getPageWithFilter,
     {
       maxDepth
     }
