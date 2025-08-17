@@ -1,8 +1,8 @@
 import type { GetServerSideProps } from 'next'
 
-import { host } from '@/lib/config'
 import type { SiteMap } from '@/lib/types'
-// import { getSiteMap } from '@/lib/get-site-map'
+import { host } from '@/lib/config'
+//import { getSiteMap } from '@/lib/get-site-map'
 import { getSiteMapStatic } from '@/lib/static-site-map'
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -67,4 +67,6 @@ const createSitemap = (siteMap: SiteMap) =>
   </urlset>
 `
 
-export default () => null
+export default function noop() {
+  return null
+}
