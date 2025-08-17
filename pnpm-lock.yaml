@@ -53,6 +53,9 @@ importers:
       p-memoize:
         specifier: ^7.1.1
         version: 7.1.1
+      pako:
+        specifier: ^2.1.0
+        version: 2.1.0
       posthog-js:
         specifier: ^1.249.4
         version: 1.249.4
@@ -90,6 +93,9 @@ importers:
       '@types/node':
         specifier: ^22.15.30
         version: 22.15.30
+      '@types/pako':
+        specifier: ^2.0.4
+        version: 2.0.4
       '@types/prismjs':
         specifier: ^1.26.5
         version: 1.26.5
@@ -565,6 +571,9 @@ packages:
 
   '@types/node@22.15.30':
     resolution: {integrity: sha512-6Q7lr06bEHdlfplU6YRbgG1SFBdlsfNC4/lX+SkhiTs0cpJkOElmWls8PxDFv4yY/xKb8Y6SO0OmSX4wgqTZbA==}
+
+  '@types/pako@2.0.4':
+    resolution: {integrity: sha512-VWDCbrLeVXJM9fihYodcLiIv0ku+AlOa/TQ1SvYOaBuyrSKgEcro95LJyIsJ4vSo6BXIxOKxiJAat04CmST9Fw==}
 
   '@types/prismjs@1.26.5':
     resolution: {integrity: sha512-AUZTa7hQ2KY5L7AmtSiqxlhWxb4ina0yd8hNbl4TWuqnv/pFP0nDMb3YrfSBf4hJVGLh2YEIBfKaBW/9UEl6IQ==}
@@ -1823,6 +1832,9 @@ packages:
     resolution: {integrity: sha512-MyIV3ZA/PmyBN/ud8vV9XzwTrNtR4jFrObymZYnZqMmW0zA8Z17vnT0rBgFE/TlohB+YCHqXMgZzb3Csp49vqg==}
     engines: {node: '>=14.16'}
 
+  pako@2.1.0:
+    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
+
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -2835,6 +2847,8 @@ snapshots:
   '@types/node@22.15.30':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/pako@2.0.4': {}
 
   '@types/prismjs@1.26.5': {}
 
@@ -4275,6 +4289,8 @@ snapshots:
       p-finally: 1.0.0
 
   p-timeout@6.1.4: {}
+
+  pako@2.1.0: {}
 
   parent-module@1.0.1:
     dependencies:
