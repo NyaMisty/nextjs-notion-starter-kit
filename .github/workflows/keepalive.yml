@@ -26,4 +26,4 @@ jobs:
             git commit --allow-empty -m "$new_message"
           fi
           git push -f
-      - uses: gautamkrishnar/keepalive-workflow@master # using the workflow with default settings
+      - uses: NyaMisty/keepalive-workflow@v2 # using the workflow with default settings
