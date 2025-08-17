@@ -6,6 +6,8 @@ set -e
 export
 pwd
 
+npm i -g pnpm
+
 pnpm install
 
 # patch react-icons DEP0128
@@ -13,18 +15,29 @@ sed -i 's|"main": "lib",|"main": "lib/cjs/index.js", "module": "lib/esm/index.js
 
 # (cd ./node_modules/react; yarn link)
 # (cd ./node_modules/react-dom; yarn link)
+ROOT=$PWD
 
-rm -rf ./node_modules/react-notion-x-monorepo
-git clone https://github.com/NyaMisty/react-notion-x ./node_modules/react-notion-x-monorepo
+rm -rf ./node_modules/react-notion-x-monorepo react-notion-x-monorepo
+git clone https://github.com/NyaMisty/react-notion-x react-notion-x-monorepo
 (
-    cd ./node_modules/react-notion-x-monorepo; 
-    pnpm install; 
-    # yarn link react; yarn link react-dom; 
-    (cd node_modules; rm -rf react; ln -s ../../react)
-    (cd node_modules; rm -rf react-dom; ln -s ../../react-dom)
-    pnpm build; 
-    # yarn run link; 
+    cd react-notion-x-monorepo
+    pnpm install # must pnpm install at outside, otherwise pnpm build will fail with random ambigious errors
+    
+    (cd node_modules; rm -rf react; ln -s $ROOT/node_modules/react)
+    (cd node_modules; rm -rf react-dom; ln -s $ROOT/node_modules/react-dom)
+    (cd packages/react-notion-x/node_modules; rm -rf react; ln -s $ROOT/node_modules/react)
+    (cd packages/react-notion-x/node_modules; rm -rf react-dom; ln -s $ROOT/node_modules/react-dom)
+    pnpm build
 )
+mv react-notion-x-monorepo ./node_modules/react-notion-x-monorepo
+#(    
+#    cd ./node_modules/react-notion-x-monorepo; 
+#    (cd node_modules; rm -rf react; ln -s ../../react)
+#    (cd node_modules; rm -rf react-dom; ln -s ../../react-dom)
+#    (cd packages/react-notion-x/node_modules; rm -rf react; ln -s ../../../../react)
+#    (cd packages/react-notion-x/node_modules; rm -rf react-dom; ln -s ../../../../react-dom)
+#    pnpm build; 
+#)
 
 # (cd /tmp/react-notion-x/packages/react-notion-x; yarn link)
 # (cd /tmp/react-notion-x/packages/notion-types; yarn link)
