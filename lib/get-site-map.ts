@@ -59,6 +59,7 @@ async function getAllPagesImpl(
       if (!recordMap) {
         // throw new Error(`Error loading page "${pageId}"`)
         console.warn(`Error loading page "${pageId}"`)
+        return map
       }
 
       const block = recordMap.block[pageId]?.value

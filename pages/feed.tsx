@@ -25,6 +25,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const siteMap = await getSiteMapStatic(context)
+  if (!siteMap) {
+    return { props: {} }
+  }
   const ttlMinutes = 24 * 60 // 24 hours
   const ttlSeconds = ttlMinutes * 60
 

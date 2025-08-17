@@ -6,7 +6,7 @@ set -e
 export
 pwd
 
-yarn install
+pnpm install
 
 # patch react-icons DEP0128
 sed -i 's|"main": "lib",|"main": "lib/cjs/index.js", "module": "lib/esm/index.js", "types": "lib/esm/index.d.ts",|' node_modules/@react-icons/all-files/package.json || true
@@ -18,11 +18,11 @@ rm -rf ./node_modules/react-notion-x-monorepo
 git clone https://github.com/NyaMisty/react-notion-x ./node_modules/react-notion-x-monorepo
 (
     cd ./node_modules/react-notion-x-monorepo; 
-    yarn install; 
+    pnpm install; 
     # yarn link react; yarn link react-dom; 
     (cd node_modules; rm -rf react; ln -s ../../react)
     (cd node_modules; rm -rf react-dom; ln -s ../../react-dom)
-    yarn build; 
+    pnpm build; 
     # yarn run link; 
 )
 

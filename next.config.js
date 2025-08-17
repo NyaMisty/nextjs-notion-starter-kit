@@ -9,7 +9,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 export default withBundleAnalyzer({
-  staticPageGenerationTimeout: 300,
+  staticPageGenerationTimeout: 1000, // MOD MISTY
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'www.notion.so' },
@@ -43,5 +43,3 @@ export default withBundleAnalyzer({
   // See https://react-tweet.vercel.app/next#troubleshooting
   transpilePackages: ['react-tweet']
 })
-
-module.exports.staticPageGenerationTimeout = 1000

@@ -1,10 +1,10 @@
 // import { GetStaticProps } from 'next'
 // import type { SiteMap } from '@/lib/types'
+import type { GetStaticProps, InferGetStaticPropsType } from 'next'
 import * as React from 'react'
 
+import type { SiteMap } from '@/lib/types'
 import { getSiteMap } from '@/lib/get-site-map'
-import { SiteMap } from '@/lib/types'
-import { GetStaticProps } from 'next'
 import { serializeSiteMap } from '@/lib/static-site-map'
 
 export const getStaticProps: GetStaticProps<{ siteMap: SiteMap }>  =  async (
@@ -19,7 +19,7 @@ export const getStaticProps: GetStaticProps<{ siteMap: SiteMap }>  =  async (
 }
 
 
-export default function createSitemap({ siteMap }) {
+export default function createSitemap({ siteMap }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
       <div id="sitemapJson" dangerouslySetInnerHTML={{__html: serializeSiteMap(siteMap)}} />
