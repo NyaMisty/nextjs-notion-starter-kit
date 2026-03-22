@@ -9,7 +9,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 export default withBundleAnalyzer({
-  staticPageGenerationTimeout: 1000, // MOD MISTY
+  staticPageGenerationTimeout: 1000,
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'www.notion.so' },
@@ -18,8 +18,7 @@ export default withBundleAnalyzer({
       { protocol: 'https', hostname: 'abs.twimg.com' },
       { protocol: 'https', hostname: 'pbs.twimg.com' },
       { protocol: 'https', hostname: 's3.us-west-2.amazonaws.com' },
-      
-      { protocol: 'https', hostname: 'notion-image-proxy.misty.workers.dev' }, // MOD MISTY
+      { protocol: 'https', hostname: 'notion-image-proxy.misty.workers.dev' }
     ],
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
