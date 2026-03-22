@@ -40,5 +40,11 @@ export default withBundleAnalyzer({
   },
 
   // See https://react-tweet.vercel.app/next#troubleshooting
-  transpilePackages: ['react-tweet']
+  transpilePackages: [
+    'notion-client', // we patched react-notion-x, so need this
+    'notion-types',
+    'notion-utils',
+    'react-notion-x',
+    'react-tweet'
+  ]
 })

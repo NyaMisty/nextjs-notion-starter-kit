@@ -50,7 +50,7 @@ const getPageWithFilter = async (pageId: string, opts?: any) => {
   // present in the page, as some blocks may not be rendered (such as filtered
   // in collection views)
   const enumBlockIdsByContent = async (blockId: string) => {
-    const block = page.block[blockId]?.value
+    const block = getBlockValue(page.block[blockId])
     // console.log("Processing block", blockId, ": ", block)
     if (!block || !block.content) {
       return []
@@ -64,8 +64,8 @@ const getPageWithFilter = async (pageId: string, opts?: any) => {
 
   const blockIds = await enumBlockIdsByContent(pageId)
   page.block = Object.fromEntries(
-    Object.entries(page.block).filter(([key, _]) => blockIds.includes(key))
-  );
+    Object.entries(page.block).filter(([key]) => blockIds.includes(key))
+  )
   return page
 }
 
