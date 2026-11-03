@@ -12,6 +12,7 @@ import {
   navigationLinks,
   navigationStyle
 } from './config'
+import { filterPrivateCollectionRows } from './filter-private-collection-rows'
 import { getTweetsMap } from './get-tweets'
 import { notion } from './notion-api'
 import { getPreviewImageMap } from './preview-images'
@@ -59,6 +60,10 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
       )
     }
   }
+
+  // Hide non-Public rows from collection views (e.g. the home page database)
+  // before the record map is sent to the client.
+  recordMap = filterPrivateCollectionRows(recordMap, pageId)
 
   if (isPreviewImageSupportEnabled) {
     const previewImageMap = await getPreviewImageMap(recordMap)

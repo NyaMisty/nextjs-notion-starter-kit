@@ -1,8 +1,6 @@
-import { type Block, type ExtendedRecordMap } from 'notion-types'
 import {
   getAllPagesInSpace,
   getBlockValue,
-  getPageProperty,
   uuidToId
 } from 'notion-utils'
 import pMemoize from 'p-memoize'
@@ -11,6 +9,7 @@ import type * as types from './types'
 import * as config from './config'
 import { includeNotionIdInUrls } from './config'
 import { getCanonicalPageId } from './get-canonical-page-id'
+import { isPagePublic } from './is-page-public'
 import { notion } from './notion-api'
 
 const uuid = !!includeNotionIdInUrls
@@ -76,27 +75,6 @@ const getPageWithFilter = async (pageId: string, opts?: any) => {
     Object.entries(page.block).filter(([key]) => blockIds.includes(key))
   )
   return page
-}
-
-const isPagePublic = (block: Block, recordMap: ExtendedRecordMap) => {
-  const collection = getBlockValue(recordMap.collection?.[block.parent_id])
-  const hasPublicProperty =
-    !!collection?.schema &&
-    Object.keys(collection.schema).some(
-      (key) => collection.schema[key]?.name?.toLowerCase() === 'public'
-    )
-
-  if (!hasPublicProperty) {
-    // Pages outside a database that defines a `Public` property keep the old
-    // default of being public.
-    return true
-  }
-
-  // Inside such a database, only an explicitly checked `Public` value is
-  // public. `getPageProperty` returns null when the page block has no
-  // properties at all (e.g. a freshly created empty page), which must be
-  // treated as private instead of falling through to the old `?? true`.
-  return getPageProperty<boolean | null>('Public', block, recordMap) === true
 }
 
 async function getAllPagesImpl(
