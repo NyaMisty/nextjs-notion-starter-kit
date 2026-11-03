@@ -1,3 +1,4 @@
+import { type Block, type ExtendedRecordMap } from 'notion-types'
 import {
   getAllPagesInSpace,
   getBlockValue,
@@ -34,14 +35,58 @@ const getAllPages = pMemoize(getAllPagesImpl, {
   cacheKey: (...args) => JSON.stringify(args)
 })
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const requestInterval = Number(process.env.NOTION_REQUEST_SLOW_INTERVAL ?? 0)
+let lastRequestTime = 0
+
+const throttle = async () => {
+  if (!requestInterval) {
+    return
+  }
+
+  const wait = lastRequestTime + requestInterval - Date.now()
+  if (wait > 0) {
+    await sleep(wait)
+  }
+  lastRequestTime = Date.now()
+}
+
 const getPage = async (pageId: string, opts?: any) => {
   console.log('\nnotion getPage', uuidToId(pageId))
-  return notion.getPage(pageId, {
-    kyOptions: {
-      timeout: 30_000
-    },
-    ...opts
-  })
+
+  let lastError: any
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await throttle()
+
+    try {
+      return await notion.getPage(pageId, {
+        ofetchOptions: {
+          timeout: 30_000
+        },
+        ...opts
+      })
+    } catch (err: any) {
+      lastError = err
+
+      // Cloudflare/auth rejections won't succeed on retry.
+      if (err?.statusCode === 403) {
+        throw err
+      }
+
+      const retryAfter = Number(err?.response?.headers?.get?.('retry-after'))
+      const delay =
+        Number.isFinite(retryAfter) && retryAfter > 0
+          ? retryAfter * 1000
+          : err?.statusCode === 429
+            ? 2000 * 2 ** attempt
+            : 1000 * (attempt + 1)
+
+      await sleep(delay)
+    }
+  }
+
+  throw lastError
 }
 
 const getPageWithFilter = async (pageId: string, opts?: any) => {
@@ -76,6 +121,27 @@ const getPageWithFilter = async (pageId: string, opts?: any) => {
   return page
 }
 
+const isPagePublic = (block: Block, recordMap: ExtendedRecordMap) => {
+  const collection = getBlockValue(recordMap.collection?.[block.parent_id])
+  const hasPublicProperty =
+    !!collection?.schema &&
+    Object.keys(collection.schema).some(
+      (key) => collection.schema[key]?.name?.toLowerCase() === 'public'
+    )
+
+  if (!hasPublicProperty) {
+    // Pages outside a database that defines a `Public` property keep the old
+    // default of being public.
+    return true
+  }
+
+  // Inside such a database, only an explicitly checked `Public` value is
+  // public. `getPageProperty` returns null when the page block has no
+  // properties at all (e.g. a freshly created empty page), which must be
+  // treated as private instead of falling through to the old `?? true`.
+  return getPageProperty<boolean | null>('Public', block, recordMap) === true
+}
+
 async function getAllPagesImpl(
   rootNotionPageId: string,
   rootNotionSpaceId?: string,
@@ -92,7 +158,9 @@ async function getAllPagesImpl(
     rootNotionSpaceId,
     !filterBlocks ? getPage : getPageWithFilter,
     {
-      maxDepth
+      maxDepth,
+      // Serialize the traversal so Notion doesn't rate-limit the sitemap build.
+      concurrency: 1
     }
   )
 
@@ -114,9 +182,7 @@ async function getAllPagesImpl(
         return map
       }
 
-      if (
-        !(getPageProperty<boolean | null>('Public', block, recordMap) ?? true)
-      ) {
+      if (!isPagePublic(block, recordMap)) {
         return map
       }
 
