@@ -31,19 +31,22 @@ git clone https://github.com/NyaMisty/react-notion-x react-notion-x-monorepo
     pnpm build
 )
 
-mv react-notion-x-monorepo ./node_modules/react-notion-x-monorepo
-
 # Link the fork packages directly. Their runtime dependencies (p-queue,
 # normalize-url, react-intersection-observer, ...) live in the monorepo's
 # node_modules, so resolve the packages from inside it. Packing them and using
 # `pnpm link` drops those dependencies and breaks the Next.js build.
+#
+# Keep the monorepo at the project root (not inside node_modules): Next.js
+# only transpiles TypeScript sources whose real path is outside node_modules.
+# If the linked packages resolve into node_modules, the build fails parsing
+# `type` imports instead of running them through SWC's TypeScript loader.
 (
     cd ./node_modules
     rm -rf notion-client notion-types notion-utils react-notion-x
-    ln -sf react-notion-x-monorepo/packages/notion-client notion-client
-    ln -sf react-notion-x-monorepo/packages/notion-types notion-types
-    ln -sf react-notion-x-monorepo/packages/notion-utils notion-utils
-    ln -sf react-notion-x-monorepo/packages/react-notion-x react-notion-x
+    ln -sf ../react-notion-x-monorepo/packages/notion-client notion-client
+    ln -sf ../react-notion-x-monorepo/packages/notion-types notion-types
+    ln -sf ../react-notion-x-monorepo/packages/notion-utils notion-utils
+    ln -sf ../react-notion-x-monorepo/packages/react-notion-x react-notion-x
 )
 
 pnpm list notion-client notion-types notion-utils react-notion-x --depth 0

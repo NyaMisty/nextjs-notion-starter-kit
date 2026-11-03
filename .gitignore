@@ -31,6 +31,9 @@ yarn-error.log*
 # pnpm
 .pnpm-store
 
+# locally cloned fork used by install.sh
+/react-notion-x-monorepo
+
 # local env files
 .env
 .env.local
