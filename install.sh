@@ -54,10 +54,12 @@ pnpm link "./node_modules/react-notion-x-linked/react-notion-x"
 
 # pnpm link may restore react-notion-x's own workspace React symlinks, which can
 # produce a second React instance and trigger hooks null errors. Re-point them to
-# the app root's React packages after linking.
+# the app root's React packages after linking. The linked package has no
+# node_modules dir with pnpm 11, so create it first.
+mkdir -p ./node_modules/react-notion-x/node_modules
 rm -rf ./node_modules/react-notion-x/node_modules/react ./node_modules/react-notion-x/node_modules/react-dom
-ln -s ../../react ./node_modules/react-notion-x/node_modules/react
-ln -s ../../react-dom ./node_modules/react-notion-x/node_modules/react-dom
+ln -s "$ROOT/node_modules/react" ./node_modules/react-notion-x/node_modules/react
+ln -s "$ROOT/node_modules/react-dom" ./node_modules/react-notion-x/node_modules/react-dom
 
 pnpm list notion-client notion-types notion-utils react-notion-x --depth 0
 ls -al node_modules
