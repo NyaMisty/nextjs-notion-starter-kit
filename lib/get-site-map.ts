@@ -35,58 +35,15 @@ const getAllPages = pMemoize(getAllPagesImpl, {
   cacheKey: (...args) => JSON.stringify(args)
 })
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
-const requestInterval = Number(process.env.NOTION_REQUEST_SLOW_INTERVAL ?? 0)
-let lastRequestTime = 0
-
-const throttle = async () => {
-  if (!requestInterval) {
-    return
-  }
-
-  const wait = lastRequestTime + requestInterval - Date.now()
-  if (wait > 0) {
-    await sleep(wait)
-  }
-  lastRequestTime = Date.now()
-}
-
 const getPage = async (pageId: string, opts?: any) => {
   console.log('\nnotion getPage', uuidToId(pageId))
-
-  let lastError: any
-  for (let attempt = 0; attempt < 5; attempt++) {
-    await throttle()
-
-    try {
-      return await notion.getPage(pageId, {
-        ofetchOptions: {
-          timeout: 30_000
-        },
-        ...opts
-      })
-    } catch (err: any) {
-      lastError = err
-
-      // Cloudflare/auth rejections won't succeed on retry.
-      if (err?.statusCode === 403) {
-        throw err
-      }
-
-      const retryAfter = Number(err?.response?.headers?.get?.('retry-after'))
-      const delay =
-        Number.isFinite(retryAfter) && retryAfter > 0
-          ? retryAfter * 1000
-          : err?.statusCode === 429
-            ? 2000 * 2 ** attempt
-            : 1000 * (attempt + 1)
-
-      await sleep(delay)
-    }
-  }
-
-  throw lastError
+  // Throttling and 429 retries are handled centrally by lib/notion-api.ts.
+  return notion.getPage(pageId, {
+    ofetchOptions: {
+      timeout: 30_000
+    },
+    ...opts
+  })
 }
 
 const getPageWithFilter = async (pageId: string, opts?: any) => {
@@ -159,7 +116,7 @@ async function getAllPagesImpl(
     !filterBlocks ? getPage : getPageWithFilter,
     {
       maxDepth,
-      // Serialize the traversal so Notion doesn't rate-limit the sitemap build.
+      // lib/notion-api already serializes requests; keep this explicit too.
       concurrency: 1
     }
   )
