@@ -63,6 +63,13 @@ const getPageWithFilter = async (pageId: string, opts?: any) => {
   }
 
   const blockIds = await enumBlockIdsByContent(pageId)
+  // The page's own block has no `content` when the page is empty, in which
+  // case the enumeration above returns an empty list. Keep the page block
+  // regardless, otherwise the `Public` property below can't be read and the
+  // page would incorrectly be treated as public.
+  if (getBlockValue(page.block[pageId]) && !blockIds.includes(pageId)) {
+    blockIds.push(pageId)
+  }
   page.block = Object.fromEntries(
     Object.entries(page.block).filter(([key]) => blockIds.includes(key))
   )
@@ -74,7 +81,7 @@ async function getAllPagesImpl(
   rootNotionSpaceId?: string,
   {
     maxDepth = 1,
-    filterBlocks = false,
+    filterBlocks = false
   }: {
     maxDepth?: number
     filterBlocks?: boolean
@@ -99,8 +106,16 @@ async function getAllPagesImpl(
       }
 
       const block = getBlockValue(recordMap.block[pageId])
+      if (!block) {
+        // Without the page block we can't evaluate its `Public` property, so
+        // default to excluding it from the sitemap rather than leaking a
+        // possibly private page.
+        console.warn(`Error loading page "${pageId}": missing page block`)
+        return map
+      }
+
       if (
-        !(getPageProperty<boolean | null>('Public', block!, recordMap) ?? true)
+        !(getPageProperty<boolean | null>('Public', block, recordMap) ?? true)
       ) {
         return map
       }
